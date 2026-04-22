@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { EquipmentCard } from "@/components/EquipmentCard";
 import { getReport, saveReport, deleteReport, newId } from "@/lib/storage";
 import type { Equipment, Report } from "@/types/report";
-import { generatePDF } from "@/lib/pdf";
+// PDF lib is loaded on-demand to keep initial mobile bundle light
 import { toast } from "sonner";
 
 const ReportEditor = () => {
@@ -101,11 +101,14 @@ const ReportEditor = () => {
     }
     await saveReport({ ...report, updatedAt: Date.now() });
     setDirty(false);
-    toast.promise(generatePDF(report), {
-      loading: "Gerando PDF…",
-      success: "PDF gerado!",
-      error: "Erro ao gerar PDF",
-    });
+    toast.promise(
+      import("@/lib/pdf").then(({ generatePDF }) => generatePDF(report)),
+      {
+        loading: "Gerando PDF…",
+        success: "PDF gerado!",
+        error: "Erro ao gerar PDF",
+      }
+    );
   };
 
   return (
