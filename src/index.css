@@ -97,9 +97,20 @@
 
   body {
     @apply text-foreground;
-    background: var(--gradient-bg);
-    background-attachment: fixed;
+    background: hsl(230 35% 6%);
     font-family: 'Rajdhani', 'Inter', system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Apply the radial gradient to a fixed pseudo-layer (iOS Safari friendly) */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--gradient-bg);
+    pointer-events: none;
   }
 
   h1, h2, h3, h4 {
