@@ -153,6 +153,20 @@
       linear-gradient(90deg, hsl(var(--neon-blue) / 0.06) 1px, transparent 1px);
     background-size: 40px 40px;
   }
+
+  /* Lightweight mode: disable expensive backgrounds, glows and animations on mobile */
+  @media (max-width: 767px) {
+    body::before { background: hsl(230 35% 6%); }
+    .grid-bg { background-image: none; }
+    .neon-card { box-shadow: none; }
+    .neon-text-blue, .neon-text-lime { text-shadow: none; }
+    .animate-flicker, .animate-pulse-glow { animation: none !important; }
+    .shadow-glow-blue, .shadow-glow-lime, .shadow-glow-soft { box-shadow: none !important; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
 }
 
 @layer utilities {

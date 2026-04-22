@@ -121,9 +121,9 @@ export const EquipmentCard = ({ equipment, index, onChange, onRemove }: Props) =
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {equipment.photos.map((p, i) => (
               <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
-                <img src={p} alt={`Foto ${i + 1}`} className="w-full h-28 object-cover" />
-                <button onClick={() => removePhoto(i)}
-                  className="absolute top-1 right-1 bg-destructive/90 text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition">
+                <img src={p} alt={`Foto ${i + 1}`} loading="lazy" decoding="async" className="w-full h-28 object-cover" />
+                <button onClick={() => removePhoto(i)} aria-label="Remover foto"
+                  className="absolute top-1 right-1 bg-destructive/90 text-destructive-foreground rounded-full p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
                   <Trash2 className="w-3 h-3" />
                 </button>
               </div>
