@@ -101,6 +101,10 @@ const Reports = () => {
           </Button>
         </section>
 
+        <section className="mb-6 max-w-md mx-auto">
+          <StorageUsagePanel />
+        </section>
+
         <section>
           <h2 className="font-display text-xl mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5 neon-text-blue" />
