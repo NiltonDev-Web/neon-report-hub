@@ -2,95 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Neon Tech Reports — Electric Blue + Lime Green design system */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 230 35% 6%;
+    --foreground: 180 15% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 230 30% 9%;
+    --card-foreground: 180 15% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 230 30% 9%;
+    --popover-foreground: 180 15% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 200 100% 55%;
+    --primary-foreground: 230 35% 6%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 85 100% 55%;
+    --secondary-foreground: 230 35% 6%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 230 25% 14%;
+    --muted-foreground: 220 15% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 85 100% 55%;
+    --accent-foreground: 230 35% 6%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 350 100% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 200 60% 25%;
+    --input: 230 30% 13%;
+    --ring: 200 100% 55%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Neon palette */
+    --neon-blue: 200 100% 55%;
+    --neon-lime: 85 100% 55%;
+    --neon-cyan: 185 100% 60%;
+    --neon-pink: 320 100% 65%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Gradients */
+    --gradient-neon: linear-gradient(135deg, hsl(var(--neon-blue)), hsl(var(--neon-lime)));
+    --gradient-bg: radial-gradient(ellipse at top, hsl(230 50% 10%), hsl(230 35% 5%));
+    --gradient-card: linear-gradient(145deg, hsl(230 30% 11%), hsl(230 35% 7%));
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Glows */
+    --glow-blue: 0 0 20px hsl(var(--neon-blue) / 0.6), 0 0 40px hsl(var(--neon-blue) / 0.3);
+    --glow-lime: 0 0 20px hsl(var(--neon-lime) / 0.6), 0 0 40px hsl(var(--neon-lime) / 0.3);
+    --glow-soft: 0 0 12px hsl(var(--neon-blue) / 0.4);
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 230 35% 6%;
+    --sidebar-foreground: 180 15% 95%;
+    --sidebar-primary: 200 100% 55%;
+    --sidebar-primary-foreground: 230 35% 6%;
+    --sidebar-accent: 230 25% 14%;
+    --sidebar-accent-foreground: 180 15% 95%;
+    --sidebar-border: 200 60% 25%;
+    --sidebar-ring: 200 100% 55%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* same as root — app is dark-only */
+    --background: 230 35% 6%;
+    --foreground: 180 15% 95%;
+    --card: 230 30% 9%;
+    --card-foreground: 180 15% 95%;
+    --popover: 230 30% 9%;
+    --popover-foreground: 180 15% 95%;
+    --primary: 200 100% 55%;
+    --primary-foreground: 230 35% 6%;
+    --secondary: 85 100% 55%;
+    --secondary-foreground: 230 35% 6%;
+    --muted: 230 25% 14%;
+    --muted-foreground: 220 15% 65%;
+    --accent: 85 100% 55%;
+    --accent-foreground: 230 35% 6%;
+    --destructive: 350 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 200 60% 25%;
+    --input: 230 30% 13%;
+    --ring: 200 100% 55%;
   }
 }
 
@@ -99,7 +91,73 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground;
+  html, body, #root {
+    min-height: 100%;
   }
+
+  body {
+    @apply text-foreground;
+    background: var(--gradient-bg);
+    background-attachment: fixed;
+    font-family: 'Rajdhani', 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Orbitron', 'Rajdhani', sans-serif;
+    letter-spacing: 0.02em;
+  }
+}
+
+@layer components {
+  .neon-card {
+    background: var(--gradient-card);
+    border: 1px solid hsl(var(--neon-blue) / 0.35);
+    box-shadow: var(--glow-soft), inset 0 1px 0 hsl(var(--neon-blue) / 0.1);
+    border-radius: var(--radius);
+  }
+
+  .neon-text-blue {
+    color: hsl(var(--neon-blue));
+    text-shadow: 0 0 8px hsl(var(--neon-blue) / 0.7);
+  }
+
+  .neon-text-lime {
+    color: hsl(var(--neon-lime));
+    text-shadow: 0 0 8px hsl(var(--neon-lime) / 0.7);
+  }
+
+  .neon-border-blue {
+    border-color: hsl(var(--neon-blue));
+    box-shadow: var(--glow-blue);
+  }
+
+  .neon-border-lime {
+    border-color: hsl(var(--neon-lime));
+    box-shadow: var(--glow-lime);
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--neon-blue) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--neon-blue) / 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+@layer utilities {
+  .scrollbar-neon::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar-neon::-webkit-scrollbar-track { background: hsl(var(--muted)); }
+  .scrollbar-neon::-webkit-scrollbar-thumb {
+    background: linear-gradient(hsl(var(--neon-blue)), hsl(var(--neon-lime)));
+    border-radius: 4px;
+  }
+}
+
+/* Print styles for reports */
+@media print {
+  body { background: white !important; color: black !important; }
+  .no-print { display: none !important; }
+  .print-area { background: white !important; color: black !important; padding: 24px; }
+  .print-area * { color: black !important; text-shadow: none !important; box-shadow: none !important; }
+  .print-area img { max-width: 100% !important; }
 }
