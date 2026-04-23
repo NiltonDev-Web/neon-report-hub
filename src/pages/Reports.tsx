@@ -69,6 +69,52 @@ const Reports = () => {
     }
   };
 
+  const handleSimulateBackup = async () => {
+    if (!reports.length) {
+      toast.error("Nada para simular — crie um relatório primeiro");
+      return;
+    }
+    if (!confirm(
+      "Simular backup?\n\nIsto irá:\n1) Exportar tudo para JSON\n2) Limpar o IndexedDB\n3) Reimportar e verificar integridade\n\nUm arquivo de backup será baixado como segurança."
+    )) return;
+
+    setSimulating(true);
+    const t = toast.loading("Simulando ciclo de backup…");
+    try {
+      const result = await simulateBackupCycle();
+
+      // Baixa o JSON como salvaguarda
+      const blob = new Blob([result.json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `neontech-simulacao-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      await load();
+      toast.dismiss(t);
+
+      const kb = (result.bytes / 1024).toFixed(1);
+      if (result.ok) {
+        toast.success(
+          `✅ Integridade OK — ${result.exportedCount} relatório(s), ${kb} KB, ${result.durationMs}ms`
+        );
+      } else {
+        toast.error(
+          `⚠ ${result.mismatches.length} divergência(s): ${result.mismatches.slice(0, 2).join(" | ")}`,
+          { duration: 8000 }
+        );
+      }
+    } catch (e) {
+      toast.dismiss(t);
+      toast.error("Falha ao simular backup");
+      console.error(e);
+    } finally {
+      setSimulating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen grid-bg">
       <AppHeader>
