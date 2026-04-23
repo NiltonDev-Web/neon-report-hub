@@ -143,6 +143,64 @@ src/
 
 ---
 
+## ✅ Checklist de release
+
+Antes de clicar em **Publish**, valide cada item abaixo no preview (de preferência também em um celular real):
+
+### 💾 Autosave
+- [ ] Editar título de um relatório → aguardar ~1s → recarregar a página → alterações persistem
+- [ ] Editar campo de cliente (nome, telefone) → recarregar → dados mantidos
+- [ ] Adicionar equipamento + preencher campos → recarregar → equipamento e campos mantidos
+- [ ] Indicador no header alterna entre **"Salvar"** (sujo) e **"Salvo"** (limpo) corretamente
+
+### 📤 Export / Import
+- [ ] Botão **Exportar backup** baixa um arquivo `.json` válido contendo `version`, `exportedAt` e `reports`
+- [ ] Abrir o JSON em um editor → estrutura legível, fotos em base64 presentes
+- [ ] Limpar IndexedDB (DevTools → Application → IndexedDB → Delete database) → app abre vazio
+- [ ] Botão **Importar backup** restaura todos os relatórios com fotos intactas
+- [ ] Toast de sucesso aparece com a contagem correta de relatórios importados
+
+### 📄 PDF e impressão
+- [ ] Tentar gerar PDF sem nome do cliente → erro amigável
+- [ ] Tentar gerar PDF sem equipamentos → erro amigável
+- [ ] PDF gerado abre corretamente, contém: cabeçalho neon, dados do cliente, todos os equipamentos, status, fotos em grid, observações, assinaturas, numeração de páginas
+- [ ] Quebra de página funciona quando há muitos equipamentos/fotos
+- [ ] Nome do arquivo segue padrão `<titulo>_<id>.pdf`
+- [ ] **Imprimir** (`Ctrl/Cmd+P`) oculta botões (`no-print`) e mostra apenas o conteúdo do relatório
+
+### 📵 Offline
+- [ ] Carregar o app uma vez online
+- [ ] DevTools → Network → **Offline** (ou ativar modo avião no celular)
+- [ ] Recarregar → app continua abrindo
+- [ ] Criar novo relatório, adicionar fotos e editar funciona offline
+- [ ] Voltar online → dados continuam intactos (sem perda)
+
+### 🗄️ IndexedDB e armazenamento
+- [ ] DevTools → Application → IndexedDB → `keyval-store` contém chaves com prefixo `report:`
+- [ ] **StorageUsagePanel** na home mostra uso atual em MB e porcentagem
+- [ ] Botão de atualizar recalcula o uso
+- [ ] Excluir um relatório → uso diminui após refresh do painel
+- [ ] Simular alto uso (importar muitos relatórios) → barra muda para **amarelo (>75%)** e depois **vermelho (>90%)** com mensagens corretas
+- [ ] Em navegador sem `navigator.storage.estimate` → fallback amigável aparece
+
+### 📱 Mobile
+- [ ] Abrir o preview no celular real → sem tela branca
+- [ ] Tirar foto pela câmera (`capture="environment"`) funciona
+- [ ] Fotos são comprimidas (verificar tamanho do JSON exportado)
+- [ ] Animações pesadas e `grid-bg` desabilitados em telas <768px
+- [ ] Botão de excluir foto sempre visível (sem depender de hover)
+
+### 🧪 Build e qualidade
+- [ ] `npm run build` finaliza sem erros nem warnings críticos
+- [ ] `npm test` passa
+- [ ] Console do navegador sem erros vermelhos no fluxo principal
+- [ ] Rotas inválidas (`/qualquer-coisa`) abrem `NotFound`
+- [ ] Refresh em `/report/:id` funciona (SPA fallback)
+
+Quando todos os itens estiverem ✅, clique em **Publish** com tranquilidade.
+
+---
+
 ## 📦 Deploy
 
 Publicado automaticamente pela **Lovable**. Para republicar, abra o projeto no Lovable e clique em **Publish**.
