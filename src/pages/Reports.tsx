@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Plus, Download, Upload, Trash2, Calendar, User } from "lucide-react";
+import { FileText, Plus, Download, Upload, Trash2, Calendar, User, ShieldCheck, Loader2 } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { StorageUsagePanel } from "@/components/StorageUsagePanel";
 import { Button } from "@/components/ui/button";
-import { listReports, deleteReport, exportAllReports, importReports, newId, saveReport } from "@/lib/storage";
+import { listReports, deleteReport, exportAllReports, importReports, newId, saveReport, simulateBackupCycle } from "@/lib/storage";
 import type { Report } from "@/types/report";
 import { toast } from "sonner";
 
 const Reports = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [simulating, setSimulating] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -68,6 +69,52 @@ const Reports = () => {
     }
   };
 
+  const handleSimulateBackup = async () => {
+    if (!reports.length) {
+      toast.error("Nada para simular — crie um relatório primeiro");
+      return;
+    }
+    if (!confirm(
+      "Simular backup?\n\nIsto irá:\n1) Exportar tudo para JSON\n2) Limpar o IndexedDB\n3) Reimportar e verificar integridade\n\nUm arquivo de backup será baixado como segurança."
+    )) return;
+
+    setSimulating(true);
+    const t = toast.loading("Simulando ciclo de backup…");
+    try {
+      const result = await simulateBackupCycle();
+
+      // Baixa o JSON como salvaguarda
+      const blob = new Blob([result.json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `neontech-simulacao-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      await load();
+      toast.dismiss(t);
+
+      const kb = (result.bytes / 1024).toFixed(1);
+      if (result.ok) {
+        toast.success(
+          `✅ Integridade OK — ${result.exportedCount} relatório(s), ${kb} KB, ${result.durationMs}ms`
+        );
+      } else {
+        toast.error(
+          `⚠ ${result.mismatches.length} divergência(s): ${result.mismatches.slice(0, 2).join(" | ")}`,
+          { duration: 8000 }
+        );
+      }
+    } catch (e) {
+      toast.dismiss(t);
+      toast.error("Falha ao simular backup");
+      console.error(e);
+    } finally {
+      setSimulating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen grid-bg">
       <AppHeader>
@@ -101,8 +148,19 @@ const Reports = () => {
           </Button>
         </section>
 
-        <section className="mb-6 max-w-md mx-auto">
+        <section className="mb-6 max-w-md mx-auto space-y-3">
           <StorageUsagePanel />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSimulateBackup}
+            disabled={simulating || !reports.length}
+            className="w-full border-[hsl(var(--neon-lime))]/40 hover:bg-[hsl(var(--neon-lime))]/10"
+          >
+            {simulating
+              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Simulando…</>
+              : <><ShieldCheck className="w-4 h-4 mr-2 neon-text-lime" /> Simular backup (verificar integridade)</>}
+          </Button>
         </section>
 
         <section>
