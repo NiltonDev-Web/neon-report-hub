@@ -148,8 +148,19 @@ const Reports = () => {
           </Button>
         </section>
 
-        <section className="mb-6 max-w-md mx-auto">
+        <section className="mb-6 max-w-md mx-auto space-y-3">
           <StorageUsagePanel />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSimulateBackup}
+            disabled={simulating || !reports.length}
+            className="w-full border-[hsl(var(--neon-lime))]/40 hover:bg-[hsl(var(--neon-lime))]/10"
+          >
+            {simulating
+              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Simulando…</>
+              : <><ShieldCheck className="w-4 h-4 mr-2 neon-text-lime" /> Simular backup (verificar integridade)</>}
+          </Button>
         </section>
 
         <section>
