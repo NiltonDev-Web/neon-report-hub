@@ -201,6 +201,91 @@ Quando todos os itens estiverem ✅, clique em **Publish** com tranquilidade.
 
 ---
 
+## ☁️ Evolução para a nuvem (roteiro sugerido)
+
+O app hoje é **100% client-side** e funciona muito bem para uso individual offline. Quando precisar de **multiusuário, sincronização entre dispositivos ou backup automático**, este é o caminho recomendado — sem reescrever o frontend.
+
+### 1. Hospedagem (arquivos estáticos)
+
+Como o build é feito com **Vite**, qualquer CDN de estáticos serve. Opções recomendadas:
+
+| Provedor | Vantagem |
+|----------|----------|
+| **Vercel** | Deploy automático via GitHub, preview por PR, CDN global |
+| **Netlify** | Mesma proposta, ótimo para SPAs com fallback de rotas |
+| **Lovable** | Já integrado — basta clicar em **Publish** |
+
+Configuração padrão:
+- **Build command:** `npm run build`
+- **Output directory:** `dist`
+- **SPA fallback:** redirecionar `/*` → `/index.html` (necessário para `react-router`)
+
+### 2. Banco de dados e storage (BaaS)
+
+Para substituir o `idb-keyval` por persistência em nuvem, o **Supabase** é a melhor opção para esta stack:
+
+- **PostgreSQL** → guarda os relatórios, clientes e equipamentos (substitui o IndexedDB como fonte primária)
+- **Storage Buckets** → guarda as fotos como arquivos reais (em vez de base64 inflando o JSON)
+- **Auth** → login por e-mail/senha, Google ou Apple, pronto para uso
+- **Row Level Security (RLS)** → cada usuário só enxerga seus próprios relatórios
+- **Realtime** → sincronização automática entre dispositivos
+
+Compatibilidade direta com a stack atual:
+- ✅ **TanStack Query** já cuida de cache e sincronização — basta trocar a *query function*
+- ✅ **TypeScript** ganha tipos auto-gerados a partir do schema
+- ✅ Lovable Cloud provisiona Supabase sem precisar de conta externa
+
+### 3. Como adaptar o código
+
+**a) Trocar a camada de persistência (`src/lib/storage.ts`):**
+
+```ts
+// Antes (idb-keyval)
+await set(PREFIX + report.id, report);
+
+// Depois (Supabase)
+const { error } = await supabase
+  .from('reports')
+  .upsert({ id: report.id, data: report });
+```
+
+**b) Subir fotos para o Storage em vez de salvar base64:**
+
+```ts
+const { data, error } = await supabase
+  .storage
+  .from('report-photos')
+  .upload(`${reportId}/${photoId}.jpg`, fileBlob);
+
+// Salvar apenas a URL pública no relatório
+const { data: { publicUrl } } = supabase
+  .storage
+  .from('report-photos')
+  .getPublicUrl(data.path);
+```
+
+**c) Manter o modo offline (opcional, recomendado):**
+
+Usar `idb-keyval` como **cache local + fila de sincronização**:
+1. Salvar localmente primeiro (UX instantânea, funciona offline)
+2. Marcar registros como `pending_sync: true`
+3. Quando voltar online, TanStack Query (ou um worker simples) envia os pendentes para o Supabase
+4. Resolver conflitos por `updated_at` (last-write-wins ou merge manual)
+
+### 4. Por que esse caminho
+
+| Benefício | Como se traduz no projeto |
+|-----------|---------------------------|
+| **Zero infraestrutura** | Sem servidor, Docker ou DevOps — só código |
+| **Foco no produto** | Continua sendo React + TypeScript, sem backend custom |
+| **Escalável** | Do primeiro cliente até milhares, sem refatorar |
+| **Multiusuário** | Auth + RLS resolvem isolamento de dados nativamente |
+| **Backup automático** | Supabase replica e faz backup do Postgres |
+
+> 💡 **Dica:** comece migrando apenas a tabela de relatórios. Mantenha as fotos em base64 numa primeira fase e migre para Storage depois — assim o ganho é incremental e de baixo risco.
+
+---
+
 ## 📦 Deploy
 
 Publicado automaticamente pela **Lovable**. Para republicar, abra o projeto no Lovable e clique em **Publish**.
