@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Plus, Download, Upload, Trash2, Calendar, User } from "lucide-react";
+import { FileText, Plus, Download, Upload, Trash2, Calendar, User, ShieldCheck, Loader2 } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { StorageUsagePanel } from "@/components/StorageUsagePanel";
 import { Button } from "@/components/ui/button";
-import { listReports, deleteReport, exportAllReports, importReports, newId, saveReport } from "@/lib/storage";
+import { listReports, deleteReport, exportAllReports, importReports, newId, saveReport, simulateBackupCycle } from "@/lib/storage";
 import type { Report } from "@/types/report";
 import { toast } from "sonner";
 
