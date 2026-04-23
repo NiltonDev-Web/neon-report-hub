@@ -11,6 +11,7 @@ import { toast } from "sonner";
 const Reports = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [simulating, setSimulating] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
