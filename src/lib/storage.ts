@@ -90,10 +90,23 @@ export async function exportAllReports(): Promise<string> {
 }
 
 export async function importReports(json: string): Promise<number> {
-  const data = JSON.parse(json);
-  const reports: Report[] = Array.isArray(data) ? data : data.reports || [];
+  // Hard byte cap to prevent storage exhaustion via huge payloads
+  if (new Blob([json]).size > MAX_IMPORT_BYTES) {
+    throw new Error(`Arquivo excede o limite de ${MAX_IMPORT_BYTES / (1024 * 1024)} MB`);
+  }
+  let data: unknown;
+  try {
+    data = JSON.parse(json);
+  } catch {
+    throw new Error("JSON inválido");
+  }
+  const parsed = importPayloadSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error("Formato de backup inválido ou corrompido");
+  }
+  const reports: Report[] = Array.isArray(parsed.data) ? parsed.data : parsed.data.reports;
   for (const r of reports) {
-    if (r && r.id) await saveReport(r);
+    await saveReport(r);
   }
   return reports.length;
 }
