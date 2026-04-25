@@ -1,7 +1,67 @@
 import { get, set, del, keys } from "idb-keyval";
+import { z } from "zod";
 import type { Report } from "@/types/report";
 
 const PREFIX = "report:";
+const MAX_IMPORT_BYTES = 50 * 1024 * 1024; // 50 MB
+const MAX_REPORTS_PER_IMPORT = 1000;
+const MAX_EQUIPMENTS_PER_REPORT = 500;
+const MAX_PHOTOS_PER_EQUIPMENT = 100;
+
+// Only allow inline base64 data URLs for images — blocks external URL injection
+// (which would otherwise leak the user's IP / fingerprint to third-party servers).
+const photoSchema = z
+  .string()
+  .max(15 * 1024 * 1024) // ~15 MB per photo as data URL
+  .regex(/^data:image\/(jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/, {
+    message: "Foto deve ser um data URL base64 de imagem",
+  });
+
+const equipmentSchema = z.object({
+  id: z.string().min(1).max(100),
+  name: z.string().max(500),
+  brand: z.string().max(200).optional(),
+  model: z.string().max(200).optional(),
+  serial: z.string().max(200).optional(),
+  patrimony: z.string().max(200).optional(),
+  location: z.string().max(500).optional(),
+  status: z.enum(["operational", "attention", "critical", "inoperative"]),
+  reportedIssue: z.string().max(5000).optional(),
+  diagnosis: z.string().max(5000).optional(),
+  actionTaken: z.string().max(5000).optional(),
+  partsReplaced: z.string().max(5000).optional(),
+  observations: z.string().max(5000).optional(),
+  photos: z.array(photoSchema).max(MAX_PHOTOS_PER_EQUIPMENT),
+});
+
+const clientSchema = z.object({
+  name: z.string().max(300),
+  document: z.string().max(50).optional(),
+  phone: z.string().max(50).optional(),
+  email: z.string().max(255).optional(),
+  address: z.string().max(500).optional(),
+});
+
+const reportSchema = z.object({
+  id: z.string().min(1).max(100),
+  createdAt: z.number().int().nonnegative(),
+  updatedAt: z.number().int().nonnegative(),
+  title: z.string().max(500),
+  technician: z.string().max(300),
+  serviceDate: z.string().max(50),
+  client: clientSchema,
+  equipments: z.array(equipmentSchema).max(MAX_EQUIPMENTS_PER_REPORT),
+  generalNotes: z.string().max(10000).optional(),
+});
+
+const importPayloadSchema = z.union([
+  z.array(reportSchema).max(MAX_REPORTS_PER_IMPORT),
+  z.object({
+    version: z.number().optional(),
+    exportedAt: z.number().optional(),
+    reports: z.array(reportSchema).max(MAX_REPORTS_PER_IMPORT),
+  }),
+]);
 
 export async function saveReport(report: Report): Promise<void> {
   await set(PREFIX + report.id, report);
@@ -30,10 +90,23 @@ export async function exportAllReports(): Promise<string> {
 }
 
 export async function importReports(json: string): Promise<number> {
-  const data = JSON.parse(json);
-  const reports: Report[] = Array.isArray(data) ? data : data.reports || [];
+  // Hard byte cap to prevent storage exhaustion via huge payloads
+  if (new Blob([json]).size > MAX_IMPORT_BYTES) {
+    throw new Error(`Arquivo excede o limite de ${MAX_IMPORT_BYTES / (1024 * 1024)} MB`);
+  }
+  let data: unknown;
+  try {
+    data = JSON.parse(json);
+  } catch {
+    throw new Error("JSON inválido");
+  }
+  const parsed = importPayloadSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error("Formato de backup inválido ou corrompido");
+  }
+  const reports = (Array.isArray(parsed.data) ? parsed.data : parsed.data.reports) as Report[];
   for (const r of reports) {
-    if (r && r.id) await saveReport(r);
+    await saveReport(r);
   }
   return reports.length;
 }

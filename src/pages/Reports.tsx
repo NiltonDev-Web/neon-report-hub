@@ -64,8 +64,8 @@ const Reports = () => {
       const n = await importReports(text);
       toast.success(`${n} relatório(s) importado(s)`);
       load();
-    } catch {
-      toast.error("Arquivo inválido");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Arquivo inválido");
     }
   };
 
