@@ -10,7 +10,7 @@ export const AppHeader = ({ children }: { children?: React.ReactNode }) => {
             <Zap className="w-5 h-5 text-background" strokeWidth={3} />
           </div>
           <div className="leading-tight">
-            <div className="font-display font-bold text-lg neon-text-blue">NEONTECH</div>
+            <div className="font-display font-bold text-lg neon-text-blue">NS SOLUÇÕES EM TI</div>
             <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground -mt-1">Reports</div>
           </div>
         </Link>
