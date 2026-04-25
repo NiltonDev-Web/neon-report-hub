@@ -104,7 +104,7 @@ export async function importReports(json: string): Promise<number> {
   if (!parsed.success) {
     throw new Error("Formato de backup inválido ou corrompido");
   }
-  const reports: Report[] = Array.isArray(parsed.data) ? parsed.data : parsed.data.reports;
+  const reports = (Array.isArray(parsed.data) ? parsed.data : parsed.data.reports) as Report[];
   for (const r of reports) {
     await saveReport(r);
   }
