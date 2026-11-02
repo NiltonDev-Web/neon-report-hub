@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NeonTech Reports</string>
+    <string name="title_activity_main">NeonTech Reports</string>
+    <string name="package_name">com.neontech.reports</string>
+    <string name="custom_url_scheme">com.neontech.reports</string>
+</resources>

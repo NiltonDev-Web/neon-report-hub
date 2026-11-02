@@ -1,12 +1,24 @@
 import jsPDF from "jspdf";
-import type { Report } from "@/types/report";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
+import type { Report, Equipment } from "@/types/report";
 import { STATUS_LABEL } from "@/types/report";
 
 const A4_W = 210;
 const A4_H = 297;
 const MARGIN = 14;
 
-export async function generatePDF(report: Report): Promise<void> {
+export interface GeneratePDFOptions {
+  equipmentId?: string; // Se fornecido, gera o relatório exclusivo deste equipamento
+}
+
+export async function generatePDF(report: Report, options?: GeneratePDFOptions): Promise<void> {
+  const targetEquipment = options?.equipmentId
+    ? report.equipments.find((e) => e.id === options.equipmentId)
+    : undefined;
+  const isIndividual = Boolean(targetEquipment);
+
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   let y = MARGIN;
 
@@ -26,31 +38,52 @@ export async function generatePDF(report: Report): Promise<void> {
 
   // Header
   doc.setFillColor(11, 16, 32);
-  doc.rect(0, 0, A4_W, 24, "F");
+  doc.rect(0, 0, A4_W, 26, "F");
   doc.setTextColor(0, 220, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text("RELATÓRIO TÉCNICO", MARGIN, 12);
+  doc.setFontSize(16);
+  doc.text(
+    isIndividual ? "RELATÓRIO TÉCNICO — EQUIPAMENTO" : "RELATÓRIO TÉCNICO",
+    MARGIN,
+    11
+  );
   doc.setFontSize(10);
   doc.setTextColor(180, 255, 80);
-  doc.text(report.title || "Sem título", MARGIN, 19);
-  y = 32;
+  const subtitle = isIndividual && targetEquipment
+    ? `${report.title || "Sem título"} | ${targetEquipment.name || "Equipamento"}`
+    : (report.title || "Sem título");
+  doc.text(subtitle.slice(0, 65), MARGIN, 18);
+
+  if (isIndividual && targetEquipment) {
+    doc.setFontSize(8.5);
+    doc.setTextColor(200, 230, 255);
+    doc.text(`Status: ${STATUS_LABEL[targetEquipment.status]}`, MARGIN, 23);
+  }
+
+  y = 33;
 
   doc.setTextColor(20, 20, 20);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(9.5);
   doc.text(`Data do serviço: ${formatDate(report.serviceDate)}`, MARGIN, y);
   doc.text(`Técnico: ${report.technician || "-"}`, A4_W / 2, y);
-  y += 6;
-  doc.text(`Gerado em: ${new Date(report.createdAt).toLocaleString("pt-BR")}`, MARGIN, y);
+  y += 5;
+  doc.text(`Gerado em: ${new Date().toLocaleString("pt-BR")}`, MARGIN, y);
+  if (isIndividual) {
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 100, 160);
+    doc.text(`[Relatório Individual por Equipamento]`, A4_W / 2, y);
+    doc.setTextColor(20, 20, 20);
+    doc.setFont("helvetica", "normal");
+  }
   y += 4;
   line();
 
   // Client
   ensureSpace(30);
-  sectionTitle(doc, "CLIENTE", y);
+  sectionTitle(doc, "DADOS DO CLIENTE", y);
   y += 7;
-  doc.setFontSize(10);
+  doc.setFontSize(9.5);
   doc.setFont("helvetica", "normal");
   const c = report.client;
   doc.text(`Nome: ${c.name || "-"}`, MARGIN, y); y += 5;
@@ -65,10 +98,17 @@ export async function generatePDF(report: Report): Promise<void> {
   line();
 
   // Equipments
-  for (let i = 0; i < report.equipments.length; i++) {
-    const eq = report.equipments[i];
+  const equipmentsToRender: Equipment[] = isIndividual && targetEquipment
+    ? [targetEquipment]
+    : report.equipments;
+
+  for (let i = 0; i < equipmentsToRender.length; i++) {
+    const eq = equipmentsToRender[i];
     ensureSpace(40);
-    sectionTitle(doc, `EQUIPAMENTO ${i + 1}`, y);
+    const equipTitle = isIndividual
+      ? `EQUIPAMENTO: ${eq.name || "Sem identificação"}`
+      : `EQUIPAMENTO ${i + 1}: ${eq.name || "Sem identificação"}`;
+    sectionTitle(doc, equipTitle, y);
     y += 7;
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
@@ -108,9 +148,10 @@ export async function generatePDF(report: Report): Promise<void> {
 
     // Photos
     if (eq.photos.length) {
-      ensureSpace(10);
+      ensureSpace(12);
       doc.setFont("helvetica", "bold");
-      doc.text("Fotos:", MARGIN, y); y += 5;
+      doc.text(`Registro Fotográfico (${eq.photos.length} foto${eq.photos.length > 1 ? "s" : ""}):`, MARGIN, y);
+      y += 5;
       const cols = 2;
       const gap = 4;
       const cellW = (A4_W - MARGIN * 2 - gap) / cols;
@@ -135,12 +176,13 @@ export async function generatePDF(report: Report): Promise<void> {
     line();
   }
 
+  // General notes
   if (report.generalNotes) {
     ensureSpace(20);
     sectionTitle(doc, "OBSERVAÇÕES GERAIS", y);
     y += 7;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     const lines = doc.splitTextToSize(report.generalNotes, A4_W - MARGIN * 2);
     doc.text(lines, MARGIN, y);
     y += lines.length * 5;
@@ -164,11 +206,64 @@ export async function generatePDF(report: Report): Promise<void> {
     doc.setFontSize(8);
     doc.setTextColor(120, 120, 120);
     doc.text(`Página ${p} de ${pageCount}`, A4_W - MARGIN, A4_H - 6, { align: "right" });
-    doc.text("NeonTech Reports", MARGIN, A4_H - 6);
+    const footerLabel = isIndividual && targetEquipment
+      ? `NeonTech Reports • Equipamento: ${targetEquipment.name || "Individual"}`
+      : "NeonTech Reports • NS Soluções em TI";
+    doc.text(footerLabel, MARGIN, A4_H - 6);
   }
 
-  const safeTitle = (report.title || "relatorio").replace(/[^a-z0-9-_]+/gi, "_").slice(0, 40);
-  doc.save(`${safeTitle}_${report.id}.pdf`);
+  const safeTitle = (report.title || "relatorio").replace(/[^a-z0-9-_]+/gi, "_").slice(0, 25);
+  let fileName = `${safeTitle}_${report.id.slice(0, 8)}.pdf`;
+  let shareTitle = report.title || "Relatório Técnico";
+  let shareText = `Relatório Técnico: ${report.title || "Sem título"}`;
+
+  if (isIndividual && targetEquipment) {
+    const safeEq = (targetEquipment.name || "equip").replace(/[^a-z0-9-_]+/gi, "_").slice(0, 20);
+    fileName = `${safeTitle}_${safeEq}_${report.id.slice(0, 6)}.pdf`;
+    shareTitle = `${report.title || "Relatório"} - ${targetEquipment.name}`;
+    shareText = `Relatório Técnico do Equipamento: ${targetEquipment.name}`;
+  }
+
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const dataUri = doc.output("datauristring");
+      const base64Data = dataUri.split(",")[1];
+      const savedFile = await Filesystem.writeFile({
+        path: fileName,
+        data: base64Data,
+        directory: Directory.Documents,
+        recursive: true,
+      });
+
+      await Share.share({
+        title: shareTitle,
+        text: shareText,
+        url: savedFile.uri,
+        dialogTitle: "Compartilhar Relatório em PDF",
+      });
+      return;
+    } catch (e) {
+      console.warn("Erro ao salvar nativamente com Capacitor:", e);
+    }
+  }
+
+  doc.save(fileName);
+}
+
+export async function generateEquipmentPDF(report: Report, equipmentId: string): Promise<void> {
+  return generatePDF(report, { equipmentId });
+}
+
+export async function generateAllEquipmentsPDF(report: Report): Promise<number> {
+  let count = 0;
+  for (const eq of report.equipments) {
+    await generatePDF(report, { equipmentId: eq.id });
+    count++;
+    if (report.equipments.length > 1) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+    }
+  }
+  return count;
 }
 
 function sectionTitle(doc: jsPDF, text: string, y: number) {
@@ -176,7 +271,7 @@ function sectionTitle(doc: jsPDF, text: string, y: number) {
   doc.rect(14, y - 4, 4, 6, "F");
   doc.setTextColor(0, 100, 160);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.text(text, 20, y);
   doc.setTextColor(20, 20, 20);
 }

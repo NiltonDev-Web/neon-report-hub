@@ -1,295 +1,186 @@
-# NeonTech Reports
+# 📱 NeonTech Reports — Relatórios Técnicos Offline
 
-Aplicativo web **mobile-first** para geração de **relatórios técnicos** com fotos, dados de cliente e equipamentos. Visual neon (azul elétrico + verde lima), funciona offline e salva tudo localmente no aparelho.
+**Versão Atual: 1.1.0** | **Android versionCode: 2**
 
-🌐 **Live:** https://neon-report-maker.lovable.app
-
----
-
-## ✨ Funcionalidades
-
-- 📋 Criação e edição de relatórios técnicos completos
-- 👤 Cadastro de cliente (nome, CPF/CNPJ, contato, endereço)
-- ⚙️ Múltiplos equipamentos por relatório com status (Operacional / Atenção / Crítico / Inoperante)
-- 📸 Captura de fotos pela câmera do celular com **compressão automática**
-- 💾 Armazenamento 100% local via **IndexedDB** (funciona offline)
-- 📊 Painel de monitoramento de uso de armazenamento com alertas
-- 📤 Exportar / importar backup em JSON
-- 📄 Geração de **PDF** profissional + impressão direta
-- 💡 Autosave a cada edição
-- 📱 Otimizações mobile: imagens menores, animações reduzidas, lazy loading
+Aplicativo móvel e web para geração de **relatórios técnicos com fotos**, dados de clientes e equipamentos. Funciona **100% offline**, salva todos os dados na memória do próprio celular e exporta relatórios formatados diretamente em **PDF**, prontos para envio via WhatsApp ou E-mail.
 
 ---
 
-## 🛠️ Tecnologias
+## 🌟 Novidades da Versão 1.1.0
 
-| Categoria | Stack |
-|-----------|-------|
-| **Framework** | React 18 + TypeScript 5 |
-| **Build** | Vite 5 (SWC) |
-| **Estilo** | Tailwind CSS v3 + design tokens HSL semânticos |
-| **UI** | shadcn/ui + Radix UI |
-| **Roteamento** | React Router v6 |
-| **Estado servidor** | TanStack Query |
-| **Persistência local** | IndexedDB via `idb-keyval` |
-| **PDF** | jsPDF (carregado sob demanda) |
-| **Ícones** | lucide-react |
-| **Notificações** | sonner |
-| **Testes** | Vitest |
-| **Backend** | — (100% client-side) |
+- 📄 **Geração de PDF por Equipamento Individual**:
+  - Agora é possível emitir laudos técnicos focados exclusivamente em uma única máquina, contendo o cabeçalho oficial, dados do cliente, laudo do equipamento selecionado, suas fotos e campo de assinaturas.
+- ⚡ **Botão Direto no Card do Equipamento**:
+  - Cada equipamento no editor possui o botão dedicado `PDF do Equipamento` para emissão imediata em 1 clique.
+- 📑 **Novo Painel de Exportação (`PdfExportDialog`)**:
+  - Ao clicar no botão principal `GERAR PDF`, é exibido um modal moderno com opções para:
+    1. **Relatório Geral Completo**: unifica todos os equipamentos em um único documento.
+    2. **Relatório por Equipamento Individual**: lista interativa com os equipamentos cadastrados para exportação individual.
+    3. **Gerar Todos Separados**: gera automaticamente um PDF para cada equipamento em lote.
+- 🚀 **Atalho Rápido na Tela Inicial**:
+  - Cada card de relatório na tela inicial agora possui um botão direto `PDF` para exportação rápida sem precisar abrir o editor.
+- 🔄 **Atualização Segura sem Perda de Dados**:
+  - O instalador Android foi atualizado para `versionCode 2` mantendo a assinatura e o `applicationId` (`com.neontech.reports`), garantindo que o Android preserve 100% dos dados salvos no celular ao atualizar.
 
 ---
 
-## 🚀 Como rodar localmente
+## 🚀 Tecnologias Aplicadas
 
-```bash
-# 1. Clonar o repositório
-git clone <YOUR_GIT_URL>
-cd <YOUR_PROJECT_NAME>
+O projeto une tecnologias modernas de desenvolvimento web à capacidade de compilação nativa para dispositivos móveis:
 
-# 2. Instalar dependências
-npm install        # ou bun install
+| Camada | Tecnologia | O que faz no projeto? |
+| :--- | :--- | :--- |
+| **Interface & Lógica** | **React 18 + TypeScript** | Cria a interface interativa com tipagem segura e componentização modular. |
+| **Estilização** | **Tailwind CSS + shadcn/ui** | Design responsivo, moderno (estilo neon) e otimizado para celulares. |
+| **Plataforma Mobile** | **Capacitor (Ionic)** | Converte a aplicação React em um aplicativo **Android nativo (`.apk`)**. |
+| **Banco Local (Offline)** | **IndexedDB (`idb-keyval`)** | Armazena todos os relatórios, fotos e dados localmente no celular sem precisar de internet ou servidor. |
+| **Geração de PDF** | **jsPDF** | Renderiza e monta o documento de relatório técnico no padrão A4 diretamente no aparelho. |
+| **Integração Nativa** | **Capacitor Filesystem & Share** | Salva o PDF na pasta do celular e abre a tela nativa do Android para compartilhar via WhatsApp, Drive, etc. |
+| **Compressão de Imagens** | **HTML5 Canvas API** | Redimensiona e compacta fotos tiradas pela câmera para não sobrecarregar a memória do aparelho. |
 
-# 3. Rodar em modo desenvolvimento
-npm run dev        # http://localhost:8080
+---
 
-# 4. Build de produção
+## 💡 Como o Aplicativo Funciona
+
+1. **Funcionamento 100% Local e Offline:**
+   - Nenhum dado depende de servidores externos ou conexão com a internet.
+   - Os relatórios e fotos ficam salvos no banco de dados local do celular (**IndexedDB**).
+
+2. **Criação do Relatório:**
+   - Dados do cliente com máscara automática de **CPF/CNPJ**.
+   - Data do serviço editável e identificação do técnico responsável.
+   - Lista dinâmica de equipamentos com diagnósticos, peças trocadas e status (Operacional, Atenção, Crítico, Inoperante).
+
+3. **Captura e Otimização de Fotos:**
+   - Aciona a câmera do celular diretamente pelo aplicativo.
+   - Reduz automaticamente o tamanho da imagem antes de salvar, economizando espaço e acelerando a geração do PDF.
+
+4. **Exportação e Compartilhamento de PDF:**
+   - **Relatório Completo**: gera um documento unificado contendo o cabeçalho técnico, dados do cliente e todos os equipamentos com diagnósticos e fotos.
+   - **Relatório Individual por Equipamento**: gera um PDF exclusivo para o equipamento selecionado (com seus dados cadastrais, laudo e fotos específicas), ideal para enviar laudos individuais para cada máquina ou setor.
+   - **Geração Direta no Card**: cada equipamento possui seu próprio botão "PDF do Equipamento" para emissão em 1 clique.
+   - **Geração em Lote**: opção para gerar e baixar todos os relatórios individuais de uma só vez ("Gerar Todos Separados").
+   - No celular, aciona o menu nativo do Android para envio imediato via WhatsApp, E-mail ou Drive.
+
+5. **Backup de Segurança:**
+   - Permite exportar e importar todos os dados salvos em um arquivo `.json` a qualquer momento.
+
+---
+
+## 📂 Estrutura do Projeto
+
+```text
+neon-report-hub/
+├── NeonTech_Reports_v1.1.0_Atualizacao.apk  # APK de atualização pronto para instalar no celular
+│
+├── android/                 # Projeto nativo Android compilável no Android Studio
+│   ├── app/
+│   │   ├── src/main/AndroidManifest.xml  # Permissões de câmera e armazenamento
+│   │   └── build/outputs/apk/debug/      # Local onde o app-debug.apk é gerado
+│   └── local.properties     # Configuração do caminho do Android SDK
+│
+├── src/
+│   ├── components/          # Componentes visuais
+│   │   ├── AppHeader.tsx         # Cabeçalho com backup e navegação
+│   │   ├── EquipmentCard.tsx     # Card de equipamento com fotos e botão de PDF individual
+│   │   ├── PdfExportDialog.tsx   # Modal de escolha de exportação (Completo / Por Equipamento)
+│   │   └── StorageUsagePanel.tsx # Indicador visual de consumo do IndexedDB
+│   ├── lib/
+│   │   ├── pdf.ts           # Geração de PDF (completo ou por equipamento) e nativo Share
+│   │   ├── storage.ts       # Gravação local (IndexedDB) e backup JSON
+│   │   ├── image.ts         # Compressão automática de fotos
+│   │   └── utils.ts         # Utilitários e máscaras (CPF/CNPJ)
+│   ├── pages/
+│   │   ├── Reports.tsx      # Tela inicial: lista de relatórios, backups e exportação rápida
+│   │   └── ReportEditor.tsx # Formulário de edição completa do relatório
+│   ├── types/
+│   │   └── report.ts        # Modelos de dados e tipos TypeScript
+│   ├── App.tsx              # Roteamento e provedores
+│   └── main.tsx             # Ponto de entrada React
+│
+├── capacitor.config.ts      # Configuração do Capacitor para Android
+├── package.json             # Dependências, scripts e versão (1.1.0)
+└── vite.config.ts           # Configuração de build do Vite
+```
+
+---
+
+## 🛠️ Como Executar e Gerar o Aplicativo
+
+### Pré-requisitos
+- **Node.js** (v18 ou superior)
+- **Android Studio** e **Android SDK** (instalados no computador)
+- **Java JDK** (versão 17 ou 21)
+
+---
+
+### 1. Testar no Navegador (Modo de Desenvolvimento)
+
+Para testar e programar na tela do computador:
+```powershell
+npm install
+npm run dev
+```
+O projeto abrirá no endereço: `http://localhost:8080`.
+
+---
+
+### 2. Como Gerar o Arquivo `.APK` para o Celular
+
+Sempre que fizer alterações no código e quiser gerar uma nova versão para Android, execute os seguintes passos no terminal:
+
+```powershell
+# Passo 1: Compilar o código React para produção
 npm run build
 
-# 5. Pré-visualizar build
-npm run preview
+# Passo 2: Sincronizar os arquivos web com o projeto Android
+npx cap sync
 
-# 6. Rodar testes
-npm test
+# Passo 3: Entrar na pasta android e compilar o APK instalador
+cd android
+.\gradlew.bat assembleDebug
+```
+
+Após o término da compilação com a mensagem **`BUILD SUCCESSFUL`**, o instalador `.apk` estará gerado em:
+```
+android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ---
 
-## 📐 Passo a passo do desenvolvimento
+### 3. Abrindo no Android Studio (Interface Visual)
 
-O app foi construído de forma incremental no Lovable, na seguinte ordem:
-
-### 1. Definição da identidade visual
-- Paleta neon: **azul elétrico** (`--neon-blue`) + **verde lima** (`--neon-lime`)
-- Tipografia futurista: **Orbitron** (display) + **Rajdhani** (corpo)
-- Tokens HSL semânticos em `src/index.css` e `tailwind.config.ts` (gradientes, glows, sombras)
-
-### 2. Modelagem de dados (`src/types/report.ts`)
-- Tipos `Report`, `Client`, `Equipment`
-- Enum de status com labels e cores associadas
-
-### 3. Camada de persistência (`src/lib/storage.ts`)
-- CRUD baseado em `idb-keyval` com prefixo `report:`
-- Funções de **export/import JSON** para backup
-- Geração de IDs únicos
-
-### 4. Estrutura de rotas e layout
-- `src/App.tsx` com `BrowserRouter`
-- Páginas: `Reports` (lista), `ReportEditor` (edição), `NotFound`
-- Componentes globais: `AppHeader`, `NavLink`, `ErrorBoundary`
-
-### 5. Tela inicial / lista de relatórios (`src/pages/Reports.tsx`)
-- Grid de cards com busca, contagem de equipamentos e data
-- Botões de novo relatório, exportar e importar backup
-
-### 6. Editor de relatórios (`src/pages/ReportEditor.tsx`)
-- Formulário com seções: cabeçalho, cliente, equipamentos, observações
-- **Autosave** com debounce de 800ms
-- Adição/remoção dinâmica de equipamentos
-
-### 7. Card de equipamento (`src/components/EquipmentCard.tsx`)
-- Campos técnicos: marca, modelo, série, patrimônio, diagnóstico, ação, peças
-- Upload de fotos via input `capture="environment"` (câmera do celular)
-- Miniaturas com `loading="lazy"` e botão de remoção
-
-### 8. Compressão de imagens (`src/lib/image.ts`)
-- Detecção de mobile via `userAgent` + viewport
-- Redimensionamento via `<canvas>` para JPEG (mais leve no IndexedDB)
-- Qualidade adaptativa: **0.65 / 900px** mobile, **0.78 / 1280px** desktop
-
-### 9. Geração de PDF (`src/lib/pdf.ts`)
-- jsPDF carregado dinamicamente via `import()` — reduz bundle inicial
-- Layout A4 com header neon, dados do cliente, blocos por equipamento, fotos em grid 2 colunas, assinaturas e numeração de páginas
-
-### 10. Otimizações mobile
-- CSS adaptativo desabilitando `grid-bg`, *flicker* e *glows* abaixo de 768px
-- Botões de excluir foto sempre visíveis em telas touch
-- Lazy loading de imagens
-
-### 11. Painel de uso de armazenamento (`src/components/StorageUsagePanel.tsx`)
-- API `navigator.storage.estimate()`
-- Barra de progresso com 3 níveis (verde / amarelo / vermelho)
-- Alertas orientando backup quando o uso passa de 75% / 90%
-
-### 12. Polimento
-- ErrorBoundary global
-- Toaster para feedbacks (salvar, excluir, gerar PDF, importar)
-- Estilos `print-area` / `no-print` para impressão limpa via `window.print()`
+Se preferir utilizar a interface do Android Studio:
+1. Abra o **Android Studio**.
+2. Clique em **File > Open** e selecione a pasta:
+   ```
+   neon-report-hub/android
+   ```
+3. No menu superior, vá em:
+   **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
+4. Quando finalizar, clique em **locate** na notificação que surgir para abrir o arquivo gerado.
 
 ---
 
-## 📁 Estrutura principal
+## 📲 Como Instalar ou Atualizar no Celular Android
 
-```
-src/
-├── components/         # AppHeader, EquipmentCard, StorageUsagePanel, ui/
-├── hooks/              # use-mobile, use-toast
-├── lib/                # storage.ts, image.ts, pdf.ts, utils.ts
-├── pages/              # Reports.tsx, ReportEditor.tsx, NotFound.tsx
-├── types/              # report.ts
-├── index.css           # design tokens HSL + classes neon
-└── main.tsx
-```
+### 🔄 Como Atualizar SEM Perder as Informações Já Salvas:
 
----
+> [!IMPORTANT]
+> **NÃO DESINSTALE O APLICATIVO ANTERIOR DO CELULAR!**
+> O Android foi configurado com o mesmo `applicationId` (`com.neontech.reports`) e chave de assinatura, com versão incremental (`versionCode: 2`, `versionName: "1.1.0"`). Quando você instala o novo `.apk` por cima da versão existente, o sistema operacional realiza uma **atualização em lote** e preserva **100% de todos os relatórios, clientes, equipamentos e fotos salvos no IndexedDB**.
 
-## ✅ Checklist de release
+#### Passo a passo da atualização:
 
-Antes de clicar em **Publish**, valide cada item abaixo no preview (de preferência também em um celular real):
-
-### 💾 Autosave
-- [ ] Editar título de um relatório → aguardar ~1s → recarregar a página → alterações persistem
-- [ ] Editar campo de cliente (nome, telefone) → recarregar → dados mantidos
-- [ ] Adicionar equipamento + preencher campos → recarregar → equipamento e campos mantidos
-- [ ] Indicador no header alterna entre **"Salvar"** (sujo) e **"Salvo"** (limpo) corretamente
-
-### 📤 Export / Import
-- [ ] Botão **Exportar backup** baixa um arquivo `.json` válido contendo `version`, `exportedAt` e `reports`
-- [ ] Abrir o JSON em um editor → estrutura legível, fotos em base64 presentes
-- [ ] Limpar IndexedDB (DevTools → Application → IndexedDB → Delete database) → app abre vazio
-- [ ] Botão **Importar backup** restaura todos os relatórios com fotos intactas
-- [ ] Toast de sucesso aparece com a contagem correta de relatórios importados
-
-### 📄 PDF e impressão
-- [ ] Tentar gerar PDF sem nome do cliente → erro amigável
-- [ ] Tentar gerar PDF sem equipamentos → erro amigável
-- [ ] PDF gerado abre corretamente, contém: cabeçalho neon, dados do cliente, todos os equipamentos, status, fotos em grid, observações, assinaturas, numeração de páginas
-- [ ] Quebra de página funciona quando há muitos equipamentos/fotos
-- [ ] Nome do arquivo segue padrão `<titulo>_<id>.pdf`
-- [ ] **Imprimir** (`Ctrl/Cmd+P`) oculta botões (`no-print`) e mostra apenas o conteúdo do relatório
-
-### 📵 Offline
-- [ ] Carregar o app uma vez online
-- [ ] DevTools → Network → **Offline** (ou ativar modo avião no celular)
-- [ ] Recarregar → app continua abrindo
-- [ ] Criar novo relatório, adicionar fotos e editar funciona offline
-- [ ] Voltar online → dados continuam intactos (sem perda)
-
-### 🗄️ IndexedDB e armazenamento
-- [ ] DevTools → Application → IndexedDB → `keyval-store` contém chaves com prefixo `report:`
-- [ ] **StorageUsagePanel** na home mostra uso atual em MB e porcentagem
-- [ ] Botão de atualizar recalcula o uso
-- [ ] Excluir um relatório → uso diminui após refresh do painel
-- [ ] Simular alto uso (importar muitos relatórios) → barra muda para **amarelo (>75%)** e depois **vermelho (>90%)** com mensagens corretas
-- [ ] Em navegador sem `navigator.storage.estimate` → fallback amigável aparece
-
-### 📱 Mobile
-- [ ] Abrir o preview no celular real → sem tela branca
-- [ ] Tirar foto pela câmera (`capture="environment"`) funciona
-- [ ] Fotos são comprimidas (verificar tamanho do JSON exportado)
-- [ ] Animações pesadas e `grid-bg` desabilitados em telas <768px
-- [ ] Botão de excluir foto sempre visível (sem depender de hover)
-
-### 🧪 Build e qualidade
-- [ ] `npm run build` finaliza sem erros nem warnings críticos
-- [ ] `npm test` passa
-- [ ] Console do navegador sem erros vermelhos no fluxo principal
-- [ ] Rotas inválidas (`/qualquer-coisa`) abrem `NotFound`
-- [ ] Refresh em `/report/:id` funciona (SPA fallback)
-
-Quando todos os itens estiverem ✅, clique em **Publish** com tranquilidade.
-
----
-
-## ☁️ Evolução para a nuvem (roteiro sugerido)
-
-O app hoje é **100% client-side** e funciona muito bem para uso individual offline. Quando precisar de **multiusuário, sincronização entre dispositivos ou backup automático**, este é o caminho recomendado — sem reescrever o frontend.
-
-### 1. Hospedagem (arquivos estáticos)
-
-Como o build é feito com **Vite**, qualquer CDN de estáticos serve. Opções recomendadas:
-
-| Provedor | Vantagem |
-|----------|----------|
-| **Vercel** | Deploy automático via GitHub, preview por PR, CDN global |
-| **Netlify** | Mesma proposta, ótimo para SPAs com fallback de rotas |
-| **Lovable** | Já integrado — basta clicar em **Publish** |
-
-Configuração padrão:
-- **Build command:** `npm run build`
-- **Output directory:** `dist`
-- **SPA fallback:** redirecionar `/*` → `/index.html` (necessário para `react-router`)
-
-### 2. Banco de dados e storage (BaaS)
-
-Para substituir o `idb-keyval` por persistência em nuvem, o **Supabase** é a melhor opção para esta stack:
-
-- **PostgreSQL** → guarda os relatórios, clientes e equipamentos (substitui o IndexedDB como fonte primária)
-- **Storage Buckets** → guarda as fotos como arquivos reais (em vez de base64 inflando o JSON)
-- **Auth** → login por e-mail/senha, Google ou Apple, pronto para uso
-- **Row Level Security (RLS)** → cada usuário só enxerga seus próprios relatórios
-- **Realtime** → sincronização automática entre dispositivos
-
-Compatibilidade direta com a stack atual:
-- ✅ **TanStack Query** já cuida de cache e sincronização — basta trocar a *query function*
-- ✅ **TypeScript** ganha tipos auto-gerados a partir do schema
-- ✅ Lovable Cloud provisiona Supabase sem precisar de conta externa
-
-### 3. Como adaptar o código
-
-**a) Trocar a camada de persistência (`src/lib/storage.ts`):**
-
-```ts
-// Antes (idb-keyval)
-await set(PREFIX + report.id, report);
-
-// Depois (Supabase)
-const { error } = await supabase
-  .from('reports')
-  .upsert({ id: report.id, data: report });
-```
-
-**b) Subir fotos para o Storage em vez de salvar base64:**
-
-```ts
-const { data, error } = await supabase
-  .storage
-  .from('report-photos')
-  .upload(`${reportId}/${photoId}.jpg`, fileBlob);
-
-// Salvar apenas a URL pública no relatório
-const { data: { publicUrl } } = supabase
-  .storage
-  .from('report-photos')
-  .getPublicUrl(data.path);
-```
-
-**c) Manter o modo offline (opcional, recomendado):**
-
-Usar `idb-keyval` como **cache local + fila de sincronização**:
-1. Salvar localmente primeiro (UX instantânea, funciona offline)
-2. Marcar registros como `pending_sync: true`
-3. Quando voltar online, TanStack Query (ou um worker simples) envia os pendentes para o Supabase
-4. Resolver conflitos por `updated_at` (last-write-wins ou merge manual)
-
-### 4. Por que esse caminho
-
-| Benefício | Como se traduz no projeto |
-|-----------|---------------------------|
-| **Zero infraestrutura** | Sem servidor, Docker ou DevOps — só código |
-| **Foco no produto** | Continua sendo React + TypeScript, sem backend custom |
-| **Escalável** | Do primeiro cliente até milhares, sem refatorar |
-| **Multiusuário** | Auth + RLS resolvem isolamento de dados nativamente |
-| **Backup automático** | Supabase replica e faz backup do Postgres |
-
-> 💡 **Dica:** comece migrando apenas a tabela de relatórios. Mantenha as fotos em base64 numa primeira fase e migre para Storage depois — assim o ganho é incremental e de baixo risco.
-
----
-
-## 📦 Deploy
-
-Publicado automaticamente pela **Lovable**. Para republicar, abra o projeto no Lovable e clique em **Publish**.
-
-## 📝 Licença
-
-Projeto gerado com [Lovable](https://lovable.dev).
+1. **(Opcional - Medida de Segurança adicional)**:
+   - No celular, abra o aplicativo atual e toque no botão **`Backup`** na tela inicial para baixar uma cópia de segurança em arquivo `.json`.
+2. **Copie o arquivo APK atualizado para o celular**:
+   - Utilize o arquivo [`NeonTech_Reports_v1.1.0_Atualizacao.apk`](./NeonTech_Reports_v1.1.0_Atualizacao.apk) presente na raiz deste projeto (ou o `app-debug.apk` da pasta `android/app/build/outputs/apk/debug/`).
+   - Envie para o aparelho via WhatsApp, Telegram, Google Drive ou cabo USB.
+3. **Inicie a instalação**:
+   - No celular, toque no arquivo `.apk`.
+   - O Android reconhecerá a versão anterior e exibirá a seguinte mensagem nativa:
+     > *"Deseja instalar uma atualização para este app? Seus dados existentes não serão perdidos."*
+   - Toque em **`Atualizar`** (ou **`Instalar`**).
+4. **Pronto**:
+   - Abra o **NeonTech Reports**. Todos os relatórios anteriores continuarão salvos e disponíveis, e as novas funcionalidades de geração de PDF por equipamento individual estarão prontas para uso.

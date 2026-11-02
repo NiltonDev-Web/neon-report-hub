@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { FileText, Plus, Download, Upload, Trash2, Calendar, User, ShieldCheck, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { FileText, Plus, Download, Upload, Trash2, Calendar, User, ShieldCheck, Loader2, FileDown } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { StorageUsagePanel } from "@/components/StorageUsagePanel";
+import { PdfExportDialog } from "@/components/PdfExportDialog";
 import { Button } from "@/components/ui/button";
 import { listReports, deleteReport, exportAllReports, importReports, newId, saveReport, simulateBackupCycle } from "@/lib/storage";
 import type { Report } from "@/types/report";
 import { toast } from "sonner";
 
 const Reports = () => {
+  const navigate = useNavigate();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [simulating, setSimulating] = useState(false);
+  const [selectedReportForPdf, setSelectedReportForPdf] = useState<Report | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -36,7 +39,7 @@ const Reports = () => {
       equipments: [],
     };
     await saveReport(draft);
-    window.location.href = `/relatorio/${id}`;
+    navigate(`/relatorio/${id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -118,7 +121,7 @@ const Reports = () => {
   return (
     <div className="min-h-screen grid-bg">
       <AppHeader>
-        <input ref={importRef} type="file" accept="application/json" className="hidden"
+        <input ref={importRef} type="file" accept="application/json" className="hidden" aria-label="Importar arquivo JSON"
           onChange={(e) => { if (e.target.files?.[0]) handleImport(e.target.files[0]); e.target.value = ""; }} />
         <Button variant="outline" size="sm" onClick={() => importRef.current?.click()}>
           <Upload className="w-4 h-4" />
@@ -197,19 +200,45 @@ const Reports = () => {
                       </span>
                     </div>
                   </Link>
-                  <Button
-                    variant="ghost" size="sm"
-                    onClick={() => handleDelete(r.id)}
-                    className="mt-3 w-full text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" /> Excluir
-                  </Button>
+                  <div className="mt-3 flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!r.equipments.length) {
+                          toast.error("Este relatório não possui equipamentos cadastrados.");
+                          return;
+                        }
+                        setSelectedReportForPdf(r);
+                      }}
+                      className="flex-1 border-[hsl(var(--neon-blue))]/40 hover:bg-[hsl(var(--neon-blue))]/10 text-xs text-[hsl(var(--neon-blue))]"
+                    >
+                      <FileDown className="w-3.5 h-3.5 mr-1" /> PDF
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(r.id)}
+                      className="text-destructive hover:bg-destructive/10 text-xs px-2"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Excluir
+                    </Button>
+                  </div>
                 </article>
               ))}
             </div>
           )}
         </section>
       </main>
+
+      <PdfExportDialog
+        open={Boolean(selectedReportForPdf)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedReportForPdf(null);
+        }}
+        report={selectedReportForPdf}
+      />
     </div>
   );
 };

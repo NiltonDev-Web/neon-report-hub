@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { EquipmentCard } from "@/components/EquipmentCard";
+import { PdfExportDialog } from "@/components/PdfExportDialog";
 import { getReport, saveReport, deleteReport, newId } from "@/lib/storage";
+import { maskCPFCNPJ } from "@/lib/utils";
 import type { Equipment, Report } from "@/types/report";
 // PDF lib is loaded on-demand to keep initial mobile bundle light
 import { toast } from "sonner";
@@ -17,6 +19,7 @@ const ReportEditor = () => {
   const navigate = useNavigate();
   const [report, setReport] = useState<Report | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
@@ -101,11 +104,25 @@ const ReportEditor = () => {
     }
     await saveReport({ ...report, updatedAt: Date.now() });
     setDirty(false);
+    setPdfDialogOpen(true);
+  };
+
+  const handleGenerateEquipmentPDF = async (equipmentId: string) => {
+    if (!report.client.name) {
+      toast.error("Informe o nome do cliente");
+      return;
+    }
+    await saveReport({ ...report, updatedAt: Date.now() });
+    setDirty(false);
+    const eq = report.equipments.find((e) => e.id === equipmentId);
+    const eqLabel = eq?.name || "Equipamento";
     toast.promise(
-      import("@/lib/pdf").then(({ generatePDF }) => generatePDF(report)),
+      import("@/lib/pdf").then(({ generatePDF }) =>
+        generatePDF(report, { equipmentId })
+      ),
       {
-        loading: "Gerando PDF…",
-        success: "PDF gerado!",
+        loading: `Gerando PDF de "${eqLabel}"…`,
+        success: `PDF de "${eqLabel}" gerado com sucesso!`,
         error: "Erro ao gerar PDF",
       }
     );
@@ -171,7 +188,10 @@ const ReportEditor = () => {
             </div>
             <div>
               <Label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">CPF / CNPJ</Label>
-              <Input value={report.client.document || ""} onChange={(e) => updateClient({ document: e.target.value })} />
+              <Input 
+                value={report.client.document || ""} 
+                onChange={(e) => updateClient({ document: maskCPFCNPJ(e.target.value) })} 
+              />
             </div>
             <div>
               <Label className="text-xs uppercase tracking-wider text-muted-foreground mb-1 block">Telefone</Label>
@@ -209,6 +229,7 @@ const ReportEditor = () => {
                 equipment={eq}
                 onChange={(newEq) => updateEquipment(i, newEq)}
                 onRemove={() => removeEquipment(i)}
+                onGeneratePDF={() => handleGenerateEquipmentPDF(eq.id)}
               />
             ))
           )}
@@ -227,6 +248,12 @@ const ReportEditor = () => {
           </Button>
         </div>
       </main>
+
+      <PdfExportDialog
+        open={pdfDialogOpen}
+        onOpenChange={setPdfDialogOpen}
+        report={report}
+      />
     </div>
   );
 };

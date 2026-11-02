@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Camera, Trash2, Plus } from "lucide-react";
+import { Camera, Trash2, Plus, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +15,10 @@ type Props = {
   index: number;
   onChange: (eq: Equipment) => void;
   onRemove: () => void;
+  onGeneratePDF?: () => void;
 };
 
-export const EquipmentCard = ({ equipment, index, onChange, onRemove }: Props) => {
+export const EquipmentCard = ({ equipment, index, onChange, onRemove, onGeneratePDF }: Props) => {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
@@ -47,12 +48,32 @@ export const EquipmentCard = ({ equipment, index, onChange, onRemove }: Props) =
   return (
     <div className="neon-card p-5 space-y-4 animate-flicker">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h3 className="font-display text-lg neon-text-blue">
-          ⚡ Equipamento #{index + 1}
+        <h3 className="font-display text-lg neon-text-blue flex items-center gap-2">
+          <span>⚡ Equipamento #{index + 1}</span>
+          {equipment.name && (
+            <span className="text-sm font-normal text-muted-foreground hidden sm:inline">
+              — {equipment.name}
+            </span>
+          )}
         </h3>
-        <Button variant="ghost" size="sm" onClick={onRemove} className="text-destructive hover:bg-destructive/10">
-          <Trash2 className="w-4 h-4 mr-1" /> Remover
-        </Button>
+        <div className="flex items-center gap-2">
+          {onGeneratePDF && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onGeneratePDF}
+              className="border-[hsl(var(--neon-blue))]/40 hover:bg-[hsl(var(--neon-blue))]/10 text-xs text-[hsl(var(--neon-blue))]"
+              title="Gerar PDF exclusivo deste equipamento"
+            >
+              <FileDown className="w-3.5 h-3.5 mr-1 text-[hsl(var(--neon-blue))]" />
+              PDF do Equipamento
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={onRemove} className="text-destructive hover:bg-destructive/10">
+            <Trash2 className="w-4 h-4 mr-1" /> Remover
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
